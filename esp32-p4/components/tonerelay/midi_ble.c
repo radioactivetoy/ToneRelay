@@ -8,6 +8,7 @@
 #include <string.h>
 
 #include "blemidi.h"
+#include "esp_hosted.h"
 #include "esp_log.h"
 #include "esp_random.h"
 #include "esp_timer.h"
@@ -330,7 +331,19 @@ void tonerelay_midi_ble_start(void)
             s_muid[i] = (uint8_t)(esp_random() & 0x7F);
         }
     } while (s_muid[0] == 0x7F && s_muid[1] == 0x7F && s_muid[2] == 0x7F && s_muid[3] == 0x7F);
-    esp_err_t err = nimble_port_init();
+    /* ESP-Hosted 2.x: the co-processor's Bluetooth controller is not started by the slave; the host has to
+     * initialise and enable it before the host stack starts (esp_hosted docs/bluetooth_design.md, 3.1). */
+    esp_err_t err = esp_hosted_bt_controller_init();
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "C6 bt controller init: %s", esp_err_to_name(err));
+        return;
+    }
+    err = esp_hosted_bt_controller_enable();
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "C6 bt controller enable: %s", esp_err_to_name(err));
+        return;
+    }
+    err = nimble_port_init();
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "nimble_port_init: %s", esp_err_to_name(err));
         return;

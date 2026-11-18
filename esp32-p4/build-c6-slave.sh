@@ -2,7 +2,7 @@
 # Build ESP-Hosted slave firmware for the onboard ESP32-C6 (SDIO).
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")" && pwd)"
-IDF="${IDF_PATH:-/home/admin/esp/esp-idf-v5.5.3}"
+IDF="${IDF_PATH:?source ESP-IDF's export.sh first (IDF_PATH is not set)}"
 OUT="$ROOT/components/tonerelay/slave_fw/network_adapter.bin"
 
 HOSTED=""
